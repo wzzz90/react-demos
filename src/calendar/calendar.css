@@ -1,0 +1,31 @@
+.demo-calendar {
+	width: 500px;
+	height: 500px;
+	display: flex;
+	flex-direction: column;
+}
+.demo-calendar-year {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+.demo-calendar-prev-month,
+.demo-calendar-next-month {
+	cursor: pointer;
+}
+.demo-calendar-weeks,
+.demo-calendar-days {
+	display: flex;
+	align-items: center;
+}
+
+.demo-calendar-week {
+	flex: 1;
+}
+.demo-calendar-days {
+	flex-wrap: wrap;
+}
+
+.demo-calendar-day {
+	width: 14.285%;
+}
