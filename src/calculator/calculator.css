@@ -1,0 +1,41 @@
+.demo-calendar {
+	width: 500px;
+	height: 500px;
+	display: flex;
+	flex-direction: column;
+}
+.demo-calendar-year {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+.demo-calendar-prev-month,
+.demo-calendar-next-month {
+	cursor: pointer;
+}
+.demo-calendar-weeks,
+.demo-calendar-days {
+	display: flex;
+	align-items: center;
+}
+
+.demo-calendar-week {
+	flex: 1;
+	cursor: pointer;
+}
+.demo-calendar-days {
+	flex-wrap: wrap;
+}
+
+.demo-calendar-day {
+	width: 14.285%;
+	cursor: pointer;
+}
+
+.demo-calendar-day-active {
+	background-color: skyblue;
+}
+.demo-calendar-day-disabled {
+	background-color: #e3e3e3;
+	cursor: not-allowed;
+}
