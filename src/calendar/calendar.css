@@ -21,6 +21,7 @@
 
 .demo-calendar-week {
 	flex: 1;
+	cursor: pointer;
 }
 .demo-calendar-days {
 	flex-wrap: wrap;
@@ -28,4 +29,13 @@
 
 .demo-calendar-day {
 	width: 14.285%;
+	cursor: pointer;
+}
+
+.demo-calendar-day-active {
+	background-color: skyblue;
+}
+.demo-calendar-day-disabled {
+	background-color: #e3e3e3;
+	cursor: not-allowed;
 }
