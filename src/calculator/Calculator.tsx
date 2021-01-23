@@ -49,9 +49,6 @@ const validate = (
 	const pickState = { ...defaultInputVals, ...pick(state, ['prev', 'next']) };
 	let msg = '';
 	forEach(pickState, (v, k) => {
-		console.log(v, isNil(v), validator(v), ' validator(v)');
-		console.log(errMsg, 'errMsg');
-
 		return validator(v) ? (msg += `第${NUM_TEXT_MAP[k]}个值${errMsg}`) : '';
 	});
 	return msg;
