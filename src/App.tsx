@@ -4,23 +4,6 @@ import Calendar from './calendar';
 import Calculator from './calculator';
 import './App.css';
 
-const Navs: React.FC<any> = (props) => {
-	return (
-		<div>
-			<h1>App</h1>
-			<ul>
-				<li>
-					<a to="/about">About</a>
-				</li>
-				<li>
-					<a to="/inbox">Inbox</a>
-				</li>
-			</ul>
-			{props.children}
-		</div>
-	);
-};
-
 function App() {
 	return (
 		<Router>

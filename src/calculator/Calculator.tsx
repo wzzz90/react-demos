@@ -1,6 +1,6 @@
 import * as React from 'react';
 import './calculator.css';
-import { forEach, isNil, map, pick, isNaN } from 'lodash';
+import { forEach, isNil, map, pick, isNaN, isEqual } from 'lodash';
 
 interface CalendarProps {
 	value?: string | number;
@@ -54,16 +54,80 @@ const validate = (
 	return msg;
 };
 
+interface ResultProps extends StateProps {
+	operator: string;
+}
+
+interface ResultRef {
+	getResult: () => void;
+}
+
+const CalculatorResult = React.forwardRef<ResultRef, ResultProps>(
+	(props, ref) => {
+		const { operator, prev, next } = props;
+		const [result, setResult] = React.useState<string>();
+		const originProps = React.useRef(props);
+
+		React.useEffect(() => {
+			if (!isEqual(originProps.current, props)) {
+				setResult('');
+				originProps.current = props;
+			}
+		}, [props]);
+
+		const getResult = React.useCallback(() => {
+			setResult(eval(`${Number(prev)}${operator}${Number(next)}`));
+		}, [next, operator, prev]);
+
+		React.useImperativeHandle(ref, () => {
+			return {
+				getResult,
+			};
+		});
+
+		return (
+			<div className={`${prefix}-result`}>
+				{`${!prev ? '' : prev + operator}  ${
+					!next ? '' : next + ' ='
+				} ${!result ? '' : result} `}
+			</div>
+		);
+	}
+);
+
+CalculatorResult.displayName = 'CalculatorResult';
+
+interface InputValComProps {
+	position: InputEnum;
+	value?: number | string;
+	onChange: (
+		event: React.ChangeEvent<HTMLInputElement>,
+		position: InputEnum
+	) => void;
+}
+
+const InputValCom: React.FC<InputValComProps> = React.memo((props) => {
+	const { position, value, onChange } = props;
+	const onChangeVal = React.useCallback(
+		(event) => onChange(event, position),
+		[onChange, position]
+	);
+	return <input type="number" value={value} onChange={onChangeVal} />;
+});
+
+InputValCom.displayName = 'InputValCom';
+
 const Calculator: React.FC<CalendarProps> = () => {
-	const [state, setState] = React.useState<StateProps>({});
+	const [next, setNext] = React.useState<number | string>();
+	const [prev, setPrev] = React.useState<number | string>();
+
 	const [operator, setOperator] = React.useState<string>('+');
-	const [result, setResult] = React.useState<string>();
+	const resultRef = React.useRef<ResultRef>(null);
 
 	const onChangeVal = React.useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>, key: InputEnum) => {
 			const val = event.target.value;
-			setState((state) => ({ ...(state ?? {}), [key]: val }));
-			setResult('');
+			key === InputEnum.Prev ? setPrev(val) : setNext(val);
 		},
 		[]
 	);
@@ -71,39 +135,35 @@ const Calculator: React.FC<CalendarProps> = () => {
 	const onChangeOperator = React.useCallback((e: React.MouseEvent) => {
 		const value = e.currentTarget.getAttribute('data-value') ?? '+';
 		setOperator(value);
-		setResult('');
 	}, []);
 
 	const onConfirm = React.useCallback(() => {
-		let msg = validateIsEmpty(state);
-		!msg && (msg += validateIsNumber(state));
-		if (!msg && Number(state.next) === 0 && operator === '/') {
+		let msg = validateIsEmpty({ prev, next });
+		!msg && (msg += validateIsNumber({ prev, next }));
+		if (!msg && Number(next) === 0 && operator === '/') {
 			msg += '分母不能为0';
 		}
 		if (msg) {
 			alert(msg);
 		} else {
-			setResult(
-				eval(`${Number(state.prev)}${operator}${Number(state.next)}`)
-			);
+			resultRef.current?.getResult();
 		}
-	}, [operator, state]);
+	}, [next, operator, prev]);
 
-	const noResult = isNil(state.prev) && isNil(state.next);
 	return (
 		<div className={prefix}>
 			<div className={`${prefix}-container`}>
-				<input
-					type="number"
-					value={state?.prev}
-					onChange={(event) => onChangeVal(event, InputEnum.Prev)}
-				></input>
+				<InputValCom
+					value={prev}
+					position={InputEnum.Prev}
+					onChange={onChangeVal}
+				/>
 				<span>{operator}</span>
-				<input
-					type="number"
-					value={state?.next}
-					onChange={(event) => onChangeVal(event, InputEnum.Next)}
-				></input>
+				<InputValCom
+					value={next}
+					position={InputEnum.Next}
+					onChange={onChangeVal}
+				/>
 				<button onClick={onConfirm}>确定</button>
 				<div className={`${prefix}-operator`}>
 					{map(operators, (o) => (
@@ -117,13 +177,12 @@ const Calculator: React.FC<CalendarProps> = () => {
 					))}
 				</div>
 			</div>
-			{!noResult && (
-				<div className={`${prefix}-result`}>
-					{`${!state.prev ? '' : state?.prev} ${operator}  ${
-						!state.next ? '' : state?.next + ' ='
-					} ${!result ? '' : result} `}
-				</div>
-			)}
+			<CalculatorResult
+				ref={resultRef}
+				operator={operator}
+				prev={prev}
+				next={next}
+			></CalculatorResult>
 		</div>
 	);
 };
